@@ -7,17 +7,22 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "default": "./dist/index.mjs"
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
     }
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts --clean --tsconfig tsconfig.build.json"
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean --tsconfig tsconfig.build.json",
+    "prepublishOnly": "npm run build"
   },
   "author": "Invoicing builder",
   "tags": [
@@ -33,5 +38,5 @@
     "tsup": "^8.5.1",
     "typescript": "^6.0.3"
   },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "packageManager": "npm@10.8.2"
 }
