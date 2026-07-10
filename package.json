@@ -1,6 +1,6 @@
 {
-  "name": "invoice-builder-sdk",
-  "version": "1.0.4",
+  "name": "@invoicing-builder/invoice-builder-sdk",
+  "version": "1.0.6",
   "description": "SDK for the Invoice Builder API supporting both TypeScript and JavaScript.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
