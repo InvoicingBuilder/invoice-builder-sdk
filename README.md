@@ -157,7 +157,7 @@ const client = new InvoiceBuilder({
 async function generateSimpleInvoice() {
   try {
     const pdfBuffer = await client.generatePdf({
-      templateId: "freelance-template-id",
+      templateId: "template-id",
       format: "pdf",
       fields: {
         invoiceNumber: "INV-2026-001",
@@ -198,7 +198,7 @@ const client = new InvoiceBuilder({
 async function generateVatInvoice() {
   try {
     const pdfBuffer = await client.generatePdf({
-      templateId: "freelance-template-id",
+      templateId: "template-id",
       format: "pdf",
       fields: {
         invoiceNumber: "INV-2026-002",
@@ -410,7 +410,7 @@ async function retrieveFieldsAndHistory() {
     }
 
     // 3. Fetch default fields / placeholders of a clean template
-    const templateFields = await client.getTemplateFields({ templateId: "freelance-template-id" });
+    const templateFields = await client.getTemplateFields({ templateId: "template-id" });
     console.log("\nAvailable editable placeholders on clean template:");
     templateFields.fields.forEach((field) => {
       console.log(`- [${field.type}] ${field.label} (ID: ${field.id})`);
