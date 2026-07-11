@@ -1,10 +1,10 @@
 # Invoice Builder SDK 🚀
 
-[![NPM Version](https://img.shields.io/npm/v/invoice-builder-sdk.svg?style=flat)](https://www.npmjs.com/package/invoice-builder-sdk)
-[![License](https://img.shields.io/npm/l/invoice-builder-sdk.svg?style=flat)](https://github.com/invoice-builder/invoice-builder-open-api/blob/main/LICENSE)
-[![Bundle Size](https://img.shields.io/bundlephobia/min/invoice-builder-sdk?style=flat-badge)](https://bundlephobia.com/package/invoice-builder-sdk)
+[![NPM Version](https://img.shields.io/npm/v/@invoicing-builder/invoice-builder-sdk.svg?style=flat)](https://www.npmjs.com/package/@invoicing-builder/invoice-builder-sdk)
+[![License](https://img.shields.io/npm/l/@invoicing-builder/invoice-builder-sdk.svg?style=flat)]()
+[![Bundle Size](https://img.shields.io/bundlephobia/min/@invoicing-builder/invoice-builder-sdk?style=flat-badge)](https://bundlephobia.com/package/@invoicing-builder/invoice-builder-sdk)
 [![TypeScript Support](https://img.shields.io/badge/TypeScript-Ready-blue.svg?style=flat-back)](https://www.typescriptlang.org/)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-back)](https://github.com/invoice-builder/invoice-builder-open-api/pulls)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-back)](https://github.com/InvoicingBuilder/invoice-builder-sdk/pulls)
 
 A modern, ultra-lightweight, and zero-dependency TypeScript/JavaScript client library for the **Invoice Builder Open API**. Seamlessly integrate dynamic PDF/PNG invoice generation, historical auditing, and custom template schemas into any JS runtime (Node.js, Browsers, Cloudflare Workers, Vercel Edge, Bun, Deno).
 
@@ -24,11 +24,14 @@ The client library helps you connect directly with the Invoice Builder API to ge
 - [Features](#features)
 - [Installation](#installation)
 - [Authentication & Configuration](#authentication--configuration)
+- [How to Find Your Template ID](#how-to-find-your-template-id)
 - [Getting Started & Examples](#getting-started--examples)
   - [1. Simple Invoice](#1-simple-invoice)
   - [2. VAT & Tax Invoice](#2-vat--tax-invoice)
-  - [3. Custom Template Fields](#3-custom-template-fields)
-  - [4. Multi-Template Batch Generation (ZIP)](#4-multi-template-batch-generation-zip)
+  - [3. Complete Detailed Invoice](#3-complete-detailed-invoice)
+  - [4. Custom Template Fields](#4-custom-template-fields)
+  - [5. Multi-Template Batch Generation (ZIP)](#5-multi-template-batch-generation-zip)
+  - [6. Retrieving Template Fields & Generation History](#6-retrieving-template-fields--generation-history)
 - [Dynamic PDF Mapping Guide](#dynamic-pdf-mapping-guide)
   - [Field Mapping Rules](#field-mapping-rules)
   - [Handling Component Types](#handling-component-types)
@@ -58,19 +61,19 @@ The client library helps you connect directly with the Invoice Builder API to ge
 Install via npm:
 
 ```bash
-npm install invoice-builder-sdk
+npm i @invoicing-builder/invoice-builder-sdk
 ```
 
 Or via yarn:
 
 ```bash
-yarn add invoice-builder-sdk
+yarn add @invoicing-builder/invoice-builder-sdk
 ```
 
 Or via pnpm:
 
 ```bash
-pnpm add invoice-builder-sdk
+pnpm add @invoicing-builder/invoice-builder-sdk
 ```
 
 ---
@@ -80,11 +83,10 @@ pnpm add invoice-builder-sdk
 To start generating invoices, you need to instantiate the `InvoiceBuilder` class. It can be initialized with an optional configuration object or will automatically fall back to environment variables.
 
 ```typescript
-import { InvoiceBuilder } from "invoice-builder-sdk";
+import { InvoiceBuilder } from "@invoicing-builder/invoice-builder-sdk";
 
 const client = new InvoiceBuilder({
   apiKey: "ib_your_api_key_here",
-  environment: "sandbox", // Optional: "production" (default) or "sandbox"
 });
 ```
 
@@ -93,7 +95,47 @@ const client = new InvoiceBuilder({
 | Option | Type | Required | Environment Fallback | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | `apiKey` | `string` | **Yes** | `INVOICE_BUILDER_API_KEY` | Your project secret API key starting with `ib_`. |
-| `environment` | `'production' \| 'sandbox'` | No | `INVOICE_BUILDER_ENV` / `NODE_ENV` | Target environment. Maps to: <br>- `production`: `https://api.invoicingbuilder.com`<br>- `sandbox`: `https://api.dev.invoicingbuilder.com` |
+
+---
+
+## How to Find Your Template ID
+
+To generate invoices, you need a `templateId`. You can obtain this in two ways:
+
+### 1. Via the Web Dashboard
+1. Log in to your **Invoicing Builder** account.
+2. Go to the **Templates** section.
+3. Click on the template you want to use.
+4. Copy the unique ID from the template details panel or directly from the browser URL:
+   `https://invoicingbuilder.com/templates/567f5aa8-a0dc-4941-b782-bbcc536054f1` (where `567f5aa8-a0dc-4941-b782-bbcc536054f1` is your `templateId`).
+
+### 2. Programmatically Via the SDK
+You can query all available templates on your account using the `listTemplates` API:
+
+```typescript
+import { InvoiceBuilder } from "@invoicing-builder/invoice-builder-sdk";
+
+const client = new InvoiceBuilder({
+  apiKey: "ib_your_api_key_here",
+});
+
+async function findTemplates() {
+  try {
+    const response = await client.listTemplates({ page: 1, limit: 10 });
+    console.log(`Total templates: ${response.total}`);
+    
+    response.items.forEach((item) => {
+      console.log(`- Name: ${item.template.name}`);
+      console.log(`  ID: ${item.template.id}`);
+      console.log(`  Last Updated: ${item.updatedAt}`);
+    });
+  } catch (error) {
+    console.error("Failed to list templates:", error);
+  }
+}
+
+findTemplates();
+```
 
 ---
 
@@ -105,13 +147,11 @@ Below are practical JavaScript and TypeScript examples showing how to use the SD
 Generate a basic PDF invoice using a predefined template.
 
 ```typescript
-import { InvoiceBuilder } from "invoice-builder-sdk";
+import { InvoiceBuilder } from "@invoicing-builder/invoice-builder-sdk";
 import * as fs from "fs/promises";
 
-// Assumes INVOICE_BUILDER_API_KEY is set in environment
 const client = new InvoiceBuilder({
   apiKey: "ib_your_api_key_here",
-  environment: "sandbox",
 });
 
 async function generateSimpleInvoice() {
@@ -148,12 +188,11 @@ generateSimpleInvoice();
 Generate a compliant VAT invoice by adding tax titles, percentages, discounts, and payment terms.
 
 ```typescript
-import { InvoiceBuilder } from "invoice-builder-sdk";
+import { InvoiceBuilder } from "@invoicing-builder/invoice-builder-sdk";
 import * as fs from "fs/promises";
 
 const client = new InvoiceBuilder({
   apiKey: "ib_your_api_key_here",
-  environment: "sandbox",
 });
 
 async function generateVatInvoice() {
@@ -199,15 +238,76 @@ async function generateVatInvoice() {
 generateVatInvoice();
 ```
 
-### 3. Custom Template Fields
-Custom templates built with the visual template designer may have custom placeholders. You can match and target them directly using their custom labels or labels you define inside the builder.
+### 3. Complete Detailed Invoice
+Generate a detailed PDF invoice using a comprehensive set of options including table items, custom fields like "PO Number", signature, logo, taxes, discounts, and shipping.
 
 ```typescript
-import { InvoiceBuilder } from "invoice-builder-sdk";
+import { InvoiceBuilder } from "@invoicing-builder/invoice-builder-sdk";
+import * as fs from "fs/promises";
 
 const client = new InvoiceBuilder({
   apiKey: "ib_your_api_key_here",
-  environment: "sandbox",
+});
+
+async function generateCompleteInvoice() {
+  try {
+    const pdfBuffer = await client.generatePdf({
+      templateId: "567f5aa8-a0dc-4941-b782-bbcc536054f1",
+      format: "pdf",
+      fields: {
+        invoiceNumber: "INV-2026-9021",
+        date: "2026-07-11",
+        dueDate: "2026-08-11",
+        currency: "USD",
+        tax: "8",
+        discount: "26",
+        shipping: "25",
+        amountPaid: "0",
+        notes: "Thank you for choosing Antigravity Labs. Please transfer payment within 30 days.",
+        terms: "Net 30 days. Payments accepted via Bank Wire or Credit Card.",
+        addLogo: "https://picsum.photos/seed/picsum/200/300",
+        signature: "https://images.unsplash.com/photo-1633265486064-086b219458ec?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        billTo: "Foster Moen\nNikolaus Group Inc\n456 Innovation Boulevard\nBerlin, 10117\nGermany\nPhone: +49 30 12345678\nEmail: billing@nikolaus-group.de",
+        shipTo: "Antigravity Labs LLC\n100 Orbit Way, Suite 400\nSan Francisco, CA 94107\nUnited States\nPhone: +1 (415) 555-0190\nEmail: finance@antigravitylabs.io\nTax ID: US-99-8877665",
+        table: [
+          {
+            description: "Quantum Engineering Services (Hours)",
+            quantity: 37.5,
+            rate: 125,
+          },
+          {
+            description: "Cloud deployment & container orchestration (SaaS)",
+            quantity: 1,
+            rate: 850,
+          },
+          {
+            description: "Enterprise support retainer (Quarterly)",
+            quantity: 1,
+            rate: 120,
+          },
+        ],
+        "PO Number": "PO-99882",
+      },
+    });
+
+    await fs.writeFile("complete-invoice.pdf", Buffer.from(pdfBuffer));
+    console.log("Detailed PDF Invoice generated successfully!");
+  } catch (error) {
+    console.error("Failed to generate detailed invoice:", error);
+  }
+}
+
+generateCompleteInvoice();
+```
+
+### 4. Custom Template Fields
+Custom templates built with the visual template designer may have custom placeholders. You can match and target them directly using their custom labels or labels you define inside the builder.
+
+```typescript
+import { InvoiceBuilder } from "@invoicing-builder/invoice-builder-sdk";
+
+const client = new InvoiceBuilder({
+  apiKey: "ib_your_api_key_here",
 });
 
 async function checkAndFillTemplate() {
@@ -234,16 +334,15 @@ async function checkAndFillTemplate() {
 }
 ```
 
-### 4. Multi-Template Batch Generation (ZIP)
+### 5. Multi-Template Batch Generation (ZIP)
 Generate multiple invoices concurrently in a single API call. The SDK will return a ZIP archive containing all documents.
 
 ```typescript
-import { InvoiceBuilder } from "invoice-builder-sdk";
+import { InvoiceBuilder } from "@invoicing-builder/invoice-builder-sdk";
 import * as fs from "fs/promises";
 
 const client = new InvoiceBuilder({
   apiKey: "ib_your_api_key_here",
-  environment: "sandbox",
 });
 
 async function generateBatch() {
@@ -275,6 +374,54 @@ async function generateBatch() {
     console.error("Batch generation failed:", error);
   }
 }
+
+generateBatch();
+```
+
+### 6. Retrieving Template Fields & Generation History
+You can query the list of generated invoices (history) and fetch the fields used in a history item or template to build dynamic forms or audit records.
+
+```typescript
+import { InvoiceBuilder } from "@invoicing-builder/invoice-builder-sdk";
+
+const client = new InvoiceBuilder({
+  apiKey: "ib_your_api_key_here",
+});
+
+async function retrieveFieldsAndHistory() {
+  try {
+    // 1. Retrieve the paginated history of generated invoices
+    console.log("Fetching invoice history logs...");
+    const historyPage = await client.listHistory({ page: 1, limit: 5 });
+    console.log(`Total historical generations: ${historyPage.total}`);
+
+    if (historyPage.items.length) {
+      const firstItem = historyPage.items[0];
+      console.log(`Latest generation ID: ${firstItem.id}`);
+      console.log(`Generated on: ${firstItem.updatedAt}`);
+      console.log(`Invoice total/balance: ${firstItem.invoice.balanceDue}`);
+
+      // 2. Fetch the specific fields and values used to generate this past invoice
+      const historyFields = await client.getTemplateFields({ historyId: firstItem.id });
+      console.log("Mapped fields used in this invoice generation:");
+      historyFields.fields.forEach((field) => {
+        console.log(`- [${field.type}] ${field.label} (ID: ${field.id}) = "${field.value}"`);
+      });
+    }
+
+    // 3. Fetch default fields / placeholders of a clean template
+    const templateFields = await client.getTemplateFields({ templateId: "freelance-template-id" });
+    console.log("\nAvailable editable placeholders on clean template:");
+    templateFields.fields.forEach((field) => {
+      console.log(`- [${field.type}] ${field.label} (ID: ${field.id})`);
+    });
+
+  } catch (error) {
+    console.error("Retrieval failed:", error);
+  }
+}
+
+retrieveFieldsAndHistory();
 ```
 
 ---
@@ -320,7 +467,6 @@ Creates an instance of the `InvoiceBuilder` client.
 * **Parameters**:
   * `config` (optional): `InvoiceBuilderConfig`
     * `apiKey` (optional): `string` - Override secret key.
-    * `environment` (optional): `'production' | 'sandbox'` - Override API base URL environment.
 
 ---
 
@@ -419,7 +565,7 @@ Deliver generated invoice binaries directly to users as inline downloads in web 
 
 ```javascript
 const express = require("express");
-const { InvoiceBuilder } = require("invoice-builder-sdk");
+const { InvoiceBuilder } = require("@invoicing-builder/invoice-builder-sdk");
 const app = express();
 
 const client = new InvoiceBuilder();

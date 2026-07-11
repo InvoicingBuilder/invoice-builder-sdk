@@ -6,8 +6,16 @@ import {
   TemplateFieldsResponse,
   HistoryItem,
   GeneratePdfOptions,
-  Environment,
 } from './types';
+
+const BASE_URL = 'https://api.invoicingbuilder.com';
+
+const ENDPOINTS = {
+  TEMPLATES: '/api/v1/templates',
+  TEMPLATE_FIELDS: '/api/v1/templates/fields',
+  HISTORY: '/api/v1/history',
+  GENERATE_PDF: '/api/v1/pdf/generate',
+} as const;
 
 export class InvoiceBuilder {
   private apiKey: string;
@@ -24,24 +32,9 @@ export class InvoiceBuilder {
       );
     }
     this.apiKey = apiKey;
-
-    // Resolve base URL based on environment setup
-    const env = config.environment || 'production';
-
-    const envUrls: Record<Environment, string> = {
-      production: 'https://api.invoicingbuilder.com',
-      sandbox: 'https://api.dev.invoicingbuilder.com',
-    };
-
-    const baseUrl = envUrls[env as Environment] || envUrls.production;
-
-    // Normalize base URL (remove trailing slashes)
-    this.baseUrl = baseUrl.replace(/\/+$/, '');
+    this.baseUrl = BASE_URL;
   }
 
-  /**
-   * Internal request helper
-   */
   private async request(path: string, options: RequestInit = {}): Promise<Response> {
     const url = `${this.baseUrl}${path}`;
     const headers = {
@@ -64,7 +57,7 @@ export class InvoiceBuilder {
             : errorData.message;
         }
       } catch (e) {
-        // Response is not JSON, ignore error parsing and use fallback message
+        console.error("Error:", e)
       }
       throw new Error(errorMessage);
     }
@@ -86,7 +79,7 @@ export class InvoiceBuilder {
     }
 
     const queryString = searchParams.toString();
-    const path = `/api/v1/templates${queryString ? `?${queryString}` : ''}`;
+    const path = `${ENDPOINTS.TEMPLATES}${queryString ? `?${queryString}` : ''}`;
 
     const response = await this.request(path, { method: 'GET' });
     return response.json();
@@ -108,7 +101,7 @@ export class InvoiceBuilder {
     if (options.templateId) searchParams.append('templateId', options.templateId);
     if (options.historyId) searchParams.append('historyId', options.historyId);
 
-    const path = `/api/v1/templates/fields?${searchParams.toString()}`;
+    const path = `${ENDPOINTS.TEMPLATE_FIELDS}?${searchParams.toString()}`;
     const response = await this.request(path, { method: 'GET' });
     return response.json();
   }
@@ -126,7 +119,7 @@ export class InvoiceBuilder {
     }
 
     const queryString = searchParams.toString();
-    const path = `/api/v1/history${queryString ? `?${queryString}` : ''}`;
+    const path = `${ENDPOINTS.HISTORY}${queryString ? `?${queryString}` : ''}`;
 
     const response = await this.request(path, { method: 'GET' });
     return response.json();
@@ -148,7 +141,7 @@ export class InvoiceBuilder {
       throw new Error('You can generate a maximum of 2 templates at a time.');
     }
 
-    const response = await this.request('/api/v1/pdf/generate', {
+    const response = await this.request(ENDPOINTS.GENERATE_PDF, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
