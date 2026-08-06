@@ -99,6 +99,26 @@ export interface GeneratePdfOptions {
   fields?: Record<string, any>;
 }
 
+export interface ApiKeyValidationResponse {
+  keyPrefix: string;
+  name: string;
+  status: string;
+  expiresAt: string | null;
+  lastUsedAt: string | null;
+  valid: boolean;
+}
+
+export interface RequestOptions {
+  /**
+   * Optional AbortSignal to cancel the request.
+   */
+  signal?: AbortSignal;
+  /**
+   * Override request timeout in milliseconds.
+   */
+  timeout?: number;
+}
+
 export interface InvoiceBuilderConfig {
   /**
    * Your API key starting with 'ib_'.

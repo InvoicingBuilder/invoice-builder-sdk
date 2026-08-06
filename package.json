@@ -1,6 +1,6 @@
 {
   "name": "@invoicing-builder/invoice-builder-sdk",
-  "version": "1.0.7",
+  "version": "1.1.0",
   "description": "SDK for the Invoice Builder API supporting both TypeScript and JavaScript.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -22,6 +22,9 @@
   ],
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --clean --tsconfig tsconfig.build.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build"
   },
   "author": "Invoicing builder",
@@ -34,9 +37,10 @@
   "repository": "https://github.com/InvoicingBuilder/invoice-builder-sdk",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^25.9.3",
+    "@types/node": "^22.10.7",
     "tsup": "^8.5.1",
-    "typescript": "^6.0.3"
+    "typescript": "^5.9.3",
+    "vitest": "^3.0.5"
   },
   "overrides": {
     "esbuild": "0.28.1"
