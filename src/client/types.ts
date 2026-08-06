@@ -1,7 +1,5 @@
 export type DocFormat = 'pdf' | 'png' | 'zip';
 
-export type Environment = 'production' | 'sandbox';
-
 export interface ListOptions {
   /**
    * The page number to retrieve (starts at 1).
@@ -107,12 +105,4 @@ export interface InvoiceBuilderConfig {
    * If not provided, falls back to the `INVOICE_BUILDER_API_KEY` environment variable.
    */
   apiKey?: string;
-  /**
-   * The target environment. Maps to preconfigured base URLs:
-   * - 'production': 'https://api.invoicingbuilder.com'
-   * - 'sandbox': 'https://api.dev.invoicingbuilder.com'
-   *
-   * By default 'production'.
-   */
-  environment?: Environment;
 }
